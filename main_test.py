@@ -2,8 +2,9 @@ import main
 import io
 import sys
 import re
+import pytest
 
-
+@pytest.mark.basic
 def test_main_1():
     captureOut = io.StringIO()
     sys.stdout = captureOut
@@ -29,6 +30,7 @@ def test_main_1():
     assert ret == target
 
 
+@pytest.mark.edge
 def test_main_2():
     captureOut = io.StringIO()
     sys.stdout = captureOut
@@ -54,11 +56,19 @@ def test_main_2():
     assert ret == target
 
 
+@pytest.mark.bonus
 def test_main_3():
     detect = 0
     with open('main.py') as f:
-        for line in f:
-            if line.find('reverse(') != -1:
+        lines = f.readlines()
+        for line in lines:
+            line = line.strip()
+            if line.startswith('#'):
+                continue
+            elif '#' in line:
+                line = line[:line.find('#')]
+            if line.find('reverse') != -1 or line.find('.reverse') != -1:
                 detect = 1
-
-    assert detect == 0, 'Do not use reverse() function'
+            if line.find('[::-1]') != -1:
+                detect = 1
+    assert detect == 0, 'Do not use reverse() function or [::-1] slicing to reverse the list!'
